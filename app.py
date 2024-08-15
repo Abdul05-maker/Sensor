@@ -1,8 +1,7 @@
-
 import streamlit as st
 import pandas as pd
 import torch
-from chronos import ChronosPipeline  
+from chronos import ChronosPipeline
 import matplotlib.pyplot as plt
 import numpy as np
 import google.generativeai as genai
@@ -44,12 +43,13 @@ def main():
                 device_map=device_map,
                 torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
             )
+
             # Debugging output
             context = torch.tensor(df['SensorReading'].values)
             st.write("Context: ", context)
             st.write("Prediction Length: ", prediction_length)
-            
-             # Perform prediction
+
+            # Perform prediction
             forecast = pipeline.predict(context, prediction_length)
 
             # Generate and display the graph
@@ -70,9 +70,18 @@ def main():
 
             # Analyze the graph using Google Gemini
             st.subheader("Graph Analysis")
-            analysis_prompt = f"Analyze the graph of sensor readings over time and explain the trends, anomalies, and predictions."
-            response = model.generate_content(analysis_prompt)
-            st.write(response.text)
+
+            analysis_prompt = (
+                f"Analyze the following graph: Historical sensor readings: {df['SensorReading'].tolist()}. "
+                f"Forecasted readings: Median values {median.tolist()}, Low values {low.tolist()}, "
+                f"High values {high.tolist()}. Explain the trends, any anomalies, and what the forecast suggests."
+            )
+
+            try:
+                response = model.generate_content(analysis_prompt)
+                st.write(response.text)
+            except Exception as e:
+                st.error(f"Error generating analysis: {e}")
 
         else:
             st.error("Please upload a well-structured CSV file with the required columns.")
