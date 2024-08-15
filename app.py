@@ -44,10 +44,13 @@ def main():
                 device_map=device_map,
                 torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
             )
-
-            # Perform prediction
+            # Debugging output
             context = torch.tensor(df['SensorReading'].values)
-            forecast = model.predict(context, prediction_length)
+            st.write("Context: ", context)
+            st.write("Prediction Length: ", prediction_length)
+            
+             # Perform prediction
+            forecast = pipeline.predict(context, prediction_length)
 
             # Generate and display the graph
             forecast_index = range(len(df), len(df) + prediction_length)
