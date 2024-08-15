@@ -37,12 +37,16 @@ def main():
             torch_dtype = st.sidebar.selectbox("Torch Data Type", ["float32", "bfloat16"])
             device_map = st.sidebar.selectbox("Device Map", ["cpu", "cuda"])
 
-            # Load Chronos-T5 (Tiny) model
-            pipeline = ChronosPipeline.from_pretrained(
-                "amazon/chronos-t5-tiny",
-                device_map=device_map,
-                torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
-            )
+            try:
+                # Load Chronos-T5 (Tiny) model
+                pipeline = ChronosPipeline.from_pretrained(
+                    "amazon/chronos-t5-tiny",
+                    device_map="cuda" if torch.cuda.is_available() else "cpu",
+                    torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
+                )
+            except NotImplementedError:
+                st.error("The selected configuration is not supported. Please switch to CPU or a different data type.")
+                return
 
             # Debugging output
             context = torch.tensor(df['SensorReading'].values)
