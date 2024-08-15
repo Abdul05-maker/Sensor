@@ -1,0 +1,8 @@
+
+streamlit
+pandas
+torch
+matplotlib
+numpy
+google-generativeai
+chronos
