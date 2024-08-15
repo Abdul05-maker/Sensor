@@ -37,15 +37,19 @@ def main():
             torch_dtype = st.sidebar.selectbox("Torch Data Type", ["float32", "bfloat16"])
             device_map = st.sidebar.selectbox("Device Map", ["cpu", "cuda"])
 
+            # Determine device
+            device = "cuda" if torch.cuda.is_available() and device_map == "cuda" else "cpu"
+            torch_dtype = torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32
+
             try:
                 # Load Chronos-T5 (Tiny) model
                 pipeline = ChronosPipeline.from_pretrained(
                     "amazon/chronos-t5-tiny",
-                    device_map="cuda" if torch.cuda.is_available() else "cpu",
-                    torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
+                    device_map=device,
+                    torch_dtype=torch_dtype,
                 )
-            except NotImplementedError:
-                st.error("The selected configuration is not supported. Please switch to CPU or a different data type.")
+            except Exception as e:
+                st.error(f"Failed to load model: {e}")
                 return
 
             # Debugging output
@@ -54,7 +58,11 @@ def main():
             st.write("Prediction Length: ", prediction_length)
 
             # Perform prediction
-            forecast = pipeline.predict(context, prediction_length)
+            try:
+                forecast = pipeline.predict(context, prediction_length)
+            except Exception as e:
+                st.error(f"Prediction failed: {e}")
+                return
 
             # Generate and display the graph
             forecast_index = range(len(df), len(df) + prediction_length)
