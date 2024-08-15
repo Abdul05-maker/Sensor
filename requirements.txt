@@ -4,5 +4,5 @@ matplotlib
 numpy
 google-generativeai
 streamlit
-chronos
+ChronosPipeline
 git+https://github.com/amazon-science/chronos-forecasting.git
