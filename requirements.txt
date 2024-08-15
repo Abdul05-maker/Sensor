@@ -1,8 +1,8 @@
-
 pandas
 torch
 matplotlib
 numpy
 google-generativeai
 streamlit
+chronos
 git+https://github.com/amazon-science/chronos-forecasting.git
