@@ -2,14 +2,20 @@
 import streamlit as st
 import pandas as pd
 import torch
-from chronos import ChronosPipeline
+from chronos import ChronosModel  # Updated import based on the latest documentation
 import matplotlib.pyplot as plt
 import numpy as np
 import google.generativeai as genai
 import os
 
+# Load API key from environment variable
+api_key = os.getenv("GENAI_API_KEY")
+if not api_key:
+    st.error("API key for Google Gemini is not set.")
+    st.stop()
+
 # Initialize Google Gemini model
-genai.configure(api_key=os.getenv("API_KEY"))
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Function to validate the uploaded CSV file
@@ -38,8 +44,8 @@ def main():
             torch_dtype = st.sidebar.selectbox("Torch Data Type", ["float32", "bfloat16"])
             device_map = st.sidebar.selectbox("Device Map", ["cpu", "cuda"])
 
-            # Load Chronos-T5 (Tiny) model
-            pipeline = ChronosPipeline.from_pretrained(
+            # Load Chronos model
+            model = ChronosModel.from_pretrained(
                 "amazon/chronos-t5-tiny",
                 device_map=device_map,
                 torch_dtype=torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32,
@@ -47,7 +53,7 @@ def main():
 
             # Perform prediction
             context = torch.tensor(df['SensorReading'].values)
-            forecast = pipeline.predict(context, prediction_length)
+            forecast = model.predict(context, prediction_length)
 
             # Generate and display the graph
             forecast_index = range(len(df), len(df) + prediction_length)
