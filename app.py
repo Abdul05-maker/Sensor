@@ -35,10 +35,8 @@ def main():
             st.sidebar.header("Prediction Parameters")
             prediction_length = st.sidebar.slider("Prediction Length", 1, 36, 12)  # 1 to 36 months
             torch_dtype = st.sidebar.selectbox("Torch Data Type", ["float32", "bfloat16"])
-            device_map = st.sidebar.selectbox("Device Map", ["cpu", "cuda"])
 
-            # Determine device
-            device = "cuda" if torch.cuda.is_available() and device_map == "cuda" else "cpu"
+            # Use default device (CPU) since `.to()` is not supported
             torch_dtype = torch.bfloat16 if torch_dtype == "bfloat16" else torch.float32
 
             try:
@@ -47,11 +45,10 @@ def main():
                     "amazon/chronos-t5-tiny",
                     torch_dtype=torch_dtype,
                 )
-                pipeline = pipeline.to(device)
 
                 # Prepare context
                 context_values = df['SensorReading'].values
-                context = torch.tensor(context_values, dtype=torch_dtype).to(device)
+                context = torch.tensor(context_values, dtype=torch_dtype)
 
                 # Perform prediction
                 forecast = pipeline.predict(context, prediction_length)
@@ -62,7 +59,7 @@ def main():
 
             # Generate and display the graph
             forecast_index = range(len(df), len(df) + prediction_length)
-            low, median, high = np.quantile(forecast[0].cpu().numpy(), [0.1, 0.5, 0.9], axis=0)
+            low, median, high = np.quantile(forecast[0].numpy(), [0.1, 0.5, 0.9], axis=0)
 
             st.subheader("Forecasted Sensor Readings")
             plt.figure(figsize=(10, 6))
