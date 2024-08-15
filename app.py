@@ -47,15 +47,11 @@ def main():
                     "amazon/chronos-t5-tiny",
                     torch_dtype=torch_dtype,
                 )
+                pipeline = pipeline.to(device)
 
                 # Prepare context
                 context_values = df['SensorReading'].values
-                context = torch.tensor(context_values, dtype=torch_dtype)
-
-                # Ensure context is not on meta device
-                if context.device.type == 'meta':
-                    st.error("Tensor is on the meta device. Please check the model and data initialization.")
-                    return
+                context = torch.tensor(context_values, dtype=torch_dtype).to(device)
 
                 # Perform prediction
                 forecast = pipeline.predict(context, prediction_length)
@@ -66,7 +62,7 @@ def main():
 
             # Generate and display the graph
             forecast_index = range(len(df), len(df) + prediction_length)
-            low, median, high = np.quantile(forecast[0].numpy(), [0.1, 0.5, 0.9], axis=0)
+            low, median, high = np.quantile(forecast[0].cpu().numpy(), [0.1, 0.5, 0.9], axis=0)
 
             st.subheader("Forecasted Sensor Readings")
             plt.figure(figsize=(10, 6))
