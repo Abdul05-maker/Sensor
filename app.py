@@ -45,24 +45,23 @@ def main():
                 # Load Chronos-T5 (Tiny) model
                 pipeline = ChronosPipeline.from_pretrained(
                     "amazon/chronos-t5-tiny",
-                    device_map=device,
                     torch_dtype=torch_dtype,
                 )
-                if device == "cuda" and not torch.cuda.is_available():
-                    st.error("CUDA is not available on this system. Switching to CPU.")
-                    device = "cpu"
-                    pipeline = ChronosPipeline.from_pretrained(
-                        "amazon/chronos-t5-tiny",
-                        device_map=device,
-                        torch_dtype=torch_dtype,
-                    )
+
+                # Move model to the selected device
+                pipeline.to(device)
+                
+                # Check if model is loaded properly
+                if not hasattr(pipeline, 'model'):
+                    st.error("Failed to load model. Ensure you have the correct configuration.")
+                    return
 
             except Exception as e:
                 st.error(f"Failed to load model: {e}")
                 return
 
             # Debugging output
-            context = torch.tensor(df['SensorReading'].values)
+            context = torch.tensor(df['SensorReading'].values, dtype=torch_dtype)
             st.write("Context: ", context)
             st.write("Prediction Length: ", prediction_length)
 
