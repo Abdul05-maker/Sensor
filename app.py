@@ -48,6 +48,9 @@ def main():
                     device_map=device,
                     torch_dtype=torch_dtype,
                 )
+                # Ensure the model is properly initialized
+                if device == "cuda":
+                    pipeline.to_empty()  # Moving to device properly if in meta state
             except Exception as e:
                 st.error(f"Failed to load model: {e}")
                 return
