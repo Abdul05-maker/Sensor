@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 import torch
-from chronos import ChronosModel
+from chronos.chronos import ChronosPipeline  
 import matplotlib.pyplot as plt
 import numpy as np
 import google.generativeai as genai
