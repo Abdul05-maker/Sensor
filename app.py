@@ -48,9 +48,15 @@ def main():
                     device_map=device,
                     torch_dtype=torch_dtype,
                 )
-                # Ensure the model is properly initialized
-                if device == "cuda":
-                    pipeline.to_empty()  # Moving to device properly if in meta state
+                if device == "cuda" and not torch.cuda.is_available():
+                    st.error("CUDA is not available on this system. Switching to CPU.")
+                    device = "cpu"
+                    pipeline = ChronosPipeline.from_pretrained(
+                        "amazon/chronos-t5-tiny",
+                        device_map=device,
+                        torch_dtype=torch_dtype,
+                    )
+
             except Exception as e:
                 st.error(f"Failed to load model: {e}")
                 return
