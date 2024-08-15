@@ -48,28 +48,12 @@ def main():
                     torch_dtype=torch_dtype,
                 )
 
-                # Move model to the selected device
-                pipeline.to(device)
-                
-                # Check if model is loaded properly
-                if not hasattr(pipeline, 'model'):
-                    st.error("Failed to load model. Ensure you have the correct configuration.")
-                    return
-
-            except Exception as e:
-                st.error(f"Failed to load model: {e}")
-                return
-
-            # Debugging output
-            context = torch.tensor(df['SensorReading'].values, dtype=torch_dtype)
-            st.write("Context: ", context)
-            st.write("Prediction Length: ", prediction_length)
-
-            # Perform prediction
-            try:
+                # Perform prediction
+                context = torch.tensor(df['SensorReading'].values, dtype=torch_dtype)
                 forecast = pipeline.predict(context, prediction_length)
+
             except Exception as e:
-                st.error(f"Prediction failed: {e}")
+                st.error(f"Failed to load model or perform prediction: {e}")
                 return
 
             # Generate and display the graph
