@@ -5,4 +5,5 @@ numpy
 google-generativeai
 streamlit
 chronos
+os
 git+https://github.com/amazon-science/chronos-forecasting.git
