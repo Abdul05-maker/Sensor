@@ -48,8 +48,16 @@ def main():
                     torch_dtype=torch_dtype,
                 )
 
+                # Prepare context
+                context_values = df['SensorReading'].values
+                context = torch.tensor(context_values, dtype=torch_dtype)
+
+                # Ensure context is not on meta device
+                if context.device.type == 'meta':
+                    st.error("Tensor is on the meta device. Please check the model and data initialization.")
+                    return
+
                 # Perform prediction
-                context = torch.tensor(df['SensorReading'].values, dtype=torch_dtype)
                 forecast = pipeline.predict(context, prediction_length)
 
             except Exception as e:
